@@ -3,24 +3,23 @@ import React from 'react'
 import FormInput from '@/app/components/home/upload/FormInput'
 import fileSchema from '@/lib/zod-schema';
 import { useUploadThing } from '@/utils/uploadthing';
+import { toast } from 'sonner';
 
 export default function UploadForm() {
-
-
-
     const { startUpload, routeConfig } = useUploadThing("pdfUploader", {
         onClientUploadComplete: () => {
             console.log("uploaded successfully!");
         },
         onUploadError: (err) => {
             console.log("error occurred while uploading", err);
+            toast.error("Error occurred while uploading", {
+                description: err.message,
+            })
         },
         onUploadBegin: ({ file }) => {
             console.log("upload has begun for", file);
         },
     });
-
-
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -35,15 +34,39 @@ export default function UploadForm() {
             console.log(
                 validatedFields.error.flatten().fieldErrors.file?.[0] ?? 'Invalid file'
             );
+            toast.error("Something went wrong", {
+                description:
+                    validatedFields.error.flatten().fieldErrors.file?.[0] ??
+                    "Invalid file",
+            });
             return;
         }
+
+        toast.success("Uploading PDF...", {
+            description: (
+                <span style={{ color: "#780000" }}>
+                    We are uploading your PDF!
+                </span>
+            ),
+        })
 
         //upload the file to uploading
         const response = await startUpload([file]);
         console.log("UPLOAD RESPONSE:", response);
         if (!response) {
+            toast.error("Something went wrong", {
+                description: 'Please use a different file',
+            })
             return;
         }
+
+        toast.success("Processing PDF", {
+            description: (
+                <span style={{ color: "#780000" }}>
+                    Hang tight! Our AI is reading through your PDF!
+                </span>
+            ),
+        });
     }
 
 
