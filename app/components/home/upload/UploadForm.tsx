@@ -4,6 +4,7 @@ import FormInput from '@/app/components/home/upload/FormInput'
 import fileSchema from '@/lib/zod-schema';
 import { useUploadThing } from '@/utils/uploadthing';
 import { toast } from 'sonner';
+import { generatePdfSummary } from '@/actions/upload-action';
 
 export default function UploadForm() {
     const { startUpload, routeConfig } = useUploadThing("pdfUploader", {
@@ -44,7 +45,7 @@ export default function UploadForm() {
 
         toast.success("Uploading PDF...", {
             description: (
-                <span style={{ color: "#780000" }}>
+                <span style={{ color: "#335C67" }}>
                     We are uploading your PDF!
                 </span>
             ),
@@ -62,11 +63,17 @@ export default function UploadForm() {
 
         toast.success("Processing PDF", {
             description: (
-                <span style={{ color: "#780000" }}>
+                <span style={{ color: "#335C67" }}>
                     Hang tight! Our AI is reading through your PDF!
                 </span>
             ),
         });
+
+
+        // parse the pdf using lang chain
+        const summary = await generatePdfSummary(response);
+        console.log('summary is:- ', { summary });
+
     }
 
 
