@@ -1,5 +1,6 @@
 'use server'
 
+import { generatePdfSummaryFromGeminiAi } from "@/lib/gemini";
 import { fetchAndExtractPdfText } from "@/lib/langchain";
 
 export async function generatePdfSummary(
@@ -8,7 +9,7 @@ export async function generatePdfSummary(
             serverData: {
                 userId: string,
                 file: {
-                    url: string,
+                    ufsUrl: string,
                     name: string,
                 }
             }
@@ -26,7 +27,7 @@ export async function generatePdfSummary(
     const {
         serverData: {
             userId,
-            file: {url: pdfUrl, name: fileName},
+            file: { ufsUrl: pdfUrl, name: fileName },
         }
     } = uplaodResponse[0];
 
@@ -40,14 +41,31 @@ export async function generatePdfSummary(
 
     try {
         const pdfText = await fetchAndExtractPdfText(pdfUrl);
-
         console.log('pdftext', { pdfText });
+        let summary;
+        // call gemini
+        try {
+            summary = await generatePdfSummaryFromGeminiAi(pdfText);
+            console.log('summary is:- ', { summary });
 
-        return {
-            success: true,
-            message: "PDF processed successfully",
-            data: pdfText,
-        };
+        } catch (geminiError) {
+            console.log('Gemini Api failed ', geminiError);
+            throw new Error('Failed to generate summary with Gemini')
+        }
+
+        if (!summary) {
+            return {
+                success: false,
+                message: 'Failed to generate summary',
+                data: null,
+            }
+        }
+
+        // return {
+        //     success: true,
+        //     message: "PDF processed successfully",
+        //     data: pdfText,
+        // };
 
     } catch (err) {
         return {
