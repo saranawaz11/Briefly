@@ -1,22 +1,30 @@
 'use server'
 
+import { getDbConnection } from "@/app/db";
 import { generatePdfSummaryFromGeminiAi } from "@/lib/gemini";
 import { fetchAndExtractPdfText } from "@/lib/langchain";
+import { formatFileNameAsTitle } from "@/utils/format-utlils";
+import { auth } from "@clerk/nextjs/server";
+
+interface PdfSummaryType {
+    fileUrl: string,
+    summary: string,
+    title: string,
+    fileName: string
+}
 
 export async function generatePdfSummary(
-    uplaodResponse: [
-        {
-            serverData: {
-                userId: string,
-                file: {
-                    ufsUrl: string,
-                    name: string,
-                }
+    uploadResponse: Array<{
+        serverData: {
+            uploadedBy: string,
+            file: {
+                ufsUrl: string,
+                name: string,
             }
         }
-    ]
+    }>
 ) {
-    if(!uplaodResponse) {
+    if (!uploadResponse || uploadResponse.length === 0) {
         return {
             success: false,
             message: 'File upload failed',
@@ -26,10 +34,9 @@ export async function generatePdfSummary(
 
     const {
         serverData: {
-            userId,
             file: { ufsUrl: pdfUrl, name: fileName },
         }
-    } = uplaodResponse[0];
+    } = uploadResponse[0];
 
     if (!pdfUrl) {
         return {
@@ -61,11 +68,16 @@ export async function generatePdfSummary(
             }
         }
 
-        // return {
-        //     success: true,
-        //     message: "PDF processed successfully",
-        //     data: pdfText,
-        // };
+        const formattedFileName = formatFileNameAsTitle(fileName);
+
+        return {
+            success: true,
+            message: "PDF generated successfully",
+            data: {
+                title: formattedFileName,
+                summary,
+            },
+        };
 
     } catch (err) {
         return {
@@ -76,47 +88,65 @@ export async function generatePdfSummary(
     }
 }
 
+async function savePdfSummary({ userId, fileUrl, summary, title, fileName }: { userId: string, fileUrl: string, summary: string, title: string, fileName: string }) {
+    // sql inserting pdf summary
+    try {
+        const sql = await getDbConnection()
+        await sql`
+            INSERT INTO pdf_summaries (
+                user_id,
+                original_file_url,
+                summary_text,
+                title,
+                file_name
+            ) VALUES (
+                ${userId},
+                ${fileUrl},
+                ${summary},
+                ${title},
+                ${fileName}
+            );
+        `
+    } catch (error) {
+        console.error('Error saving the PDF summary', error)
+        throw error
+    }
+}
 
-// export async function generatePdfSummar(uploadResponse: any) {
-//     if (!uploadResponse) {
-//         return {
-//             success: false,
-//             message: 'File upload failed',
-//             data: null,
-//         };
-//     }
+export async function storePdfSummaryAction({
+    fileUrl,
+    summary,
+    title,
+    fileName
+}: PdfSummaryType) {
+    // user is logged in and has a userId
 
-//     const {
-//         serverData: {
-//             userId,
-//             file: pdfUrl,
-//         }
-//     } = uploadResponse[0];
-
-//     if (!pdfUrl) {
-//         return {
-//             success: false,
-//             message: 'File upload failed',
-//             data: null,
-//         };
-//     }
-
-//     try {
-//         const pdfText = await fetchAndExtractPdfText(pdfUrl);
-
-//         console.log('pdftext', { pdfText });
-
-//         return {
-//             success: true,
-//             message: "PDF processed successfully",
-//             data: pdfText,
-//         };
-
-//     } catch (err) {
-//         return {
-//             success: false,
-//             message: err instanceof Error ? err.message : "Something went wrong",
-//             data: null
-//         };
-//     }
-// }
+    // savepdf summary
+    // savepdf summary()
+    try {
+        const { userId } = await auth()
+        if (!userId) {
+            return {
+                success: false,
+                message: 'User not found'
+            }
+        }
+        await savePdfSummary({
+            userId,
+            fileUrl,
+            summary,
+            title,
+            fileName
+        });
+        return {
+            success: true,
+            message: 'PDF summary saved successfully'
+        }
+    } catch (error) {
+        return {
+            success: false,
+            message: error instanceof Error ? error?.message : 'Failed to save PDF summary',
+            data: null
+        }
+    }
+}

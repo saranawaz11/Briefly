@@ -4,10 +4,13 @@ import FormInput from '@/app/components/home/upload/FormInput'
 import fileSchema from '@/lib/zod-schema';
 import { useUploadThing } from '@/utils/uploadthing';
 import { toast } from 'sonner';
-import { generatePdfSummary } from '@/actions/upload-action';
+import { generatePdfSummary, storePdfSummaryAction } from '@/actions/upload-action';
 
 export default function UploadForm() {
-    const { startUpload, routeConfig } = useUploadThing("pdfUploader", {
+    const formRef = React.useRef<HTMLFormElement>(null);
+    const [title, setTitle] = React.useState('');
+
+    const { startUpload } = useUploadThing("pdfUploader", {
         onClientUploadComplete: () => {
             console.log("uploaded successfully!");
         },
@@ -17,8 +20,8 @@ export default function UploadForm() {
                 description: err.message,
             })
         },
-        onUploadBegin: ({ file }) => {
-            console.log("upload has begun for", file);
+        onUploadBegin: (fileName) => {
+            console.log("upload has begun for", fileName);
         },
     });
 
@@ -71,15 +74,48 @@ export default function UploadForm() {
 
 
         // parse the pdf using lang chain
-        const summary = await generatePdfSummary(response);
-        console.log('summary is:- ', { summary });
+        const result = await generatePdfSummary(response);
+        console.log('summary is:- ', { result });
+        const { data = null, message = null, success = false } = result || {};
 
+        if (!success || !data) {
+            toast.error("Failed to generate summary", {
+                description: message ?? "Please try again.",
+            });
+            return;
+        }
+
+        setTitle(data.title ?? '');
+        toast.success('Saving PDF...', {
+            description: 'Hang tight! We are saving your summary!'
+        })
+
+        if (data.summary) {
+            const storeResult = await storePdfSummaryAction({
+                summary: data.summary,
+                fileUrl: response[0].serverData.file.ufsUrl,
+                title: data.title,
+                fileName: file.name,
+            });
+
+            if (!storeResult.success) {
+                toast.error("Failed to save summary", {
+                    description: storeResult.message,
+                });
+                return;
+            }
+
+            toast.success("Summary Generated!", {
+                description: 'Your PDF has been successfully summarized and saved!',
+            })
+            formRef.current?.reset()
+        }
     }
 
 
     return (
         <div className='flex flex-col gap-8 w-full max-w-2xl mx-auto'>
-            <FormInput onSubmit={handleSubmit} />
+            <FormInput onSubmit={handleSubmit} formRef={formRef} title={title} />
         </div>
     )
 }
