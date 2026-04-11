@@ -5,11 +5,12 @@ import fileSchema from '@/lib/zod-schema';
 import { useUploadThing } from '@/utils/uploadthing';
 import { toast } from 'sonner';
 import { generatePdfSummary, storePdfSummaryAction } from '@/actions/upload-action';
+import { useRouter } from 'next/navigation';
 
 export default function UploadForm() {
     const formRef = React.useRef<HTMLFormElement>(null);
     const [title, setTitle] = React.useState('');
-
+    const router = useRouter()
     const { startUpload } = useUploadThing("pdfUploader", {
         onClientUploadComplete: () => {
             console.log("uploaded successfully!");
@@ -105,12 +106,22 @@ export default function UploadForm() {
                 return;
             }
 
+            const savedId = storeResult.data?.id;
+            if (!savedId) {
+                toast.error("Saved, but no summary id returned", {
+                    description: "You can open your summaries list from the menu.",
+                });
+                return;
+            }
+
             toast.success("Summary Generated!", {
                 description: 'Your PDF has been successfully summarized and saved!',
-            })
-            formRef.current?.reset()
+            });
+            formRef.current?.reset();
+            router.push(`/summaries/${savedId}`);
         }
     }
+
 
 
     return (

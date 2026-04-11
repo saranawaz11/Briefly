@@ -89,10 +89,8 @@ export async function generatePdfSummary(
 }
 
 async function savePdfSummary({ userId, fileUrl, summary, title, fileName }: { userId: string, fileUrl: string, summary: string, title: string, fileName: string }) {
-    // sql inserting pdf summary
-    try {
-        const sql = await getDbConnection()
-        await sql`
+    const sql = await getDbConnection()
+    const rows = await sql`
             INSERT INTO pdf_summaries (
                 user_id,
                 original_file_url,
@@ -105,12 +103,14 @@ async function savePdfSummary({ userId, fileUrl, summary, title, fileName }: { u
                 ${summary},
                 ${title},
                 ${fileName}
-            );
+            )
+            RETURNING id;
         `
-    } catch (error) {
-        console.error('Error saving the PDF summary', error)
-        throw error
+    const row = rows[0] as { id: string } | undefined
+    if (!row) {
+        throw new Error('Insert did not return a row id')
     }
+    return row
 }
 
 export async function storePdfSummaryAction({
@@ -123,6 +123,8 @@ export async function storePdfSummaryAction({
 
     // savepdf summary
     // savepdf summary()
+
+    let savedSummary;
     try {
         const { userId } = await auth()
         if (!userId) {
@@ -131,22 +133,30 @@ export async function storePdfSummaryAction({
                 message: 'User not found'
             }
         }
-        await savePdfSummary({
+        savedSummary = await savePdfSummary({
             userId,
             fileUrl,
             summary,
             title,
             fileName
         });
-        return {
-            success: true,
-            message: 'PDF summary saved successfully'
-        }
+
     } catch (error) {
         return {
             success: false,
             message: error instanceof Error ? error?.message : 'Failed to save PDF summary',
             data: null
+        }
+    }
+
+    // revalidate cache
+    // revalidatePath(`/summaries/${savedSummary.id}`)
+
+    return {
+        success: true,
+        message: 'PDF summary saved successfully',
+        data: {
+            id: savedSummary.id
         }
     }
 }
