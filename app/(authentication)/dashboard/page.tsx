@@ -1,3 +1,4 @@
+import SummaryCard from '@/app/components/summaries/SummaryCard'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Plus } from 'lucide-react'
 import Link from 'next/link'
@@ -24,16 +25,23 @@ export default function page() {
                         </div>
                     </div>
 
-                    <div>
-                        <div>
+                    <div className='mb-6'>
+                        <div className='bg-rose-50 border border-rose-200 rounded-lg p-4 text-rose-800'>
                             <p className='text-sm'>
-                                You have reached the limit of 5 uploads on the Basic plan.
-                                <Link href={'/#pricing'}>
-                                    Click here to upgrade to pro 
-                                    <ArrowRight className='h-4 w-4 inline-block'/> for unlimited uploads.
+                                You have reached the limit of 5 uploads on the Basic plan.{' '}
+                                <Link href={'/#pricing'} className='text-rose-800 underline font-medium underline-offset-4 inline-flex items-center'>
+                                    {' '}Click here to upgrade to pro
+                                    <ArrowRight className='h-4 w-4 inline-block ml-1' /> 
                                 </Link>
+                                {' '}for unlimited uploads.
                             </p>
                         </div>
+                    </div>
+
+                    <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 sm:px-0'>
+                        {[...Array(5)].map((_, index) => (
+                            <SummaryCard key={index} />
+                        ))}
                     </div>
                 </div>
             </div>
