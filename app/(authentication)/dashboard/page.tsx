@@ -1,10 +1,18 @@
 import SummaryCard from '@/app/components/summaries/SummaryCard'
 import { Button } from '@/components/ui/button'
+import { getSummaries } from '@/lib/summaries'
+import { currentUser } from '@clerk/nextjs/server'
 import { ArrowRight, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import React from 'react'
 
-export default function page() {
+export default async function page() {
+    const user = await currentUser()
+    const userId = user?.id
+    if (!userId) redirect('sign-in')
+    const summaries = await getSummaries(userId)
+    console.log('Summaries from summarucard:- ', summaries);
     return (
         <main className='min-h-screen'>
             <div className='container mx-auto flex flex-col gap-4'>
@@ -31,7 +39,7 @@ export default function page() {
                                 You have reached the limit of 5 uploads on the Basic plan.{' '}
                                 <Link href={'/#pricing'} className='text-rose-800 underline font-medium underline-offset-4 inline-flex items-center'>
                                     {' '}Click here to upgrade to pro
-                                    <ArrowRight className='h-4 w-4 inline-block ml-1' /> 
+                                    <ArrowRight className='h-4 w-4 inline-block ml-1' />
                                 </Link>
                                 {' '}for unlimited uploads.
                             </p>
@@ -39,8 +47,8 @@ export default function page() {
                     </div>
 
                     <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 sm:px-0'>
-                        {[...Array(5)].map((_, index) => (
-                            <SummaryCard key={index} />
+                        {summaries.map((summary) => (
+                            <SummaryCard key={summary.id} item={summary} />
                         ))}
                     </div>
                 </div>
