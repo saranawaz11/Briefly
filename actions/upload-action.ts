@@ -48,12 +48,12 @@ export async function generatePdfSummary(
 
     try {
         const pdfText = await fetchAndExtractPdfText(pdfUrl);
-        console.log('pdftext', { pdfText });
+        // console.log('pdftext', { pdfText });
         let summary;
         // call gemini
         try {
             summary = await generatePdfSummaryFromGeminiAi(pdfText);
-            console.log('summary is:- ', { summary });
+            // console.log('summary is:- ', { summary });
 
         } catch (geminiError) {
             console.log('Gemini Api failed ', geminiError);

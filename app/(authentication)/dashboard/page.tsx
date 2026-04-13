@@ -12,7 +12,7 @@ export default async function page() {
     const userId = user?.id
     if (!userId) redirect('sign-in')
     const summaries = await getSummaries(userId)
-    console.log('Summaries from summarucard:- ', summaries);
+    // console.log('Summaries from summarucard:- ', summaries);
     return (
         <main className='min-h-screen'>
             <div className='container mx-auto flex flex-col gap-4'>

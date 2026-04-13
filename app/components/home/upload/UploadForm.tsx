@@ -31,7 +31,7 @@ export default function UploadForm() {
         console.log('Submitted');
         const formData = new FormData(e.currentTarget);
         const file = formData.get('file') as File;
-        console.log(file);
+        // console.log(file);
 
         // validating the fields
         const validatedFields = fileSchema.safeParse({ file });
@@ -57,7 +57,7 @@ export default function UploadForm() {
 
         //upload the file to uploading
         const response = await startUpload([file]);
-        console.log("UPLOAD RESPONSE:", response);
+        // console.log("UPLOAD RESPONSE:", response);
         if (!response) {
             toast.error("Something went wrong", {
                 description: 'Please use a different file',
@@ -76,7 +76,7 @@ export default function UploadForm() {
 
         // parse the pdf using lang chain
         const result = await generatePdfSummary(response);
-        console.log('summary is:- ', { result });
+        // console.log('summary is:- ', { result });
         const { data = null, message = null, success = false } = result || {};
 
         if (!success || !data) {
