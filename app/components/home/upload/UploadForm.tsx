@@ -118,7 +118,7 @@ export default function UploadForm() {
                 description: 'Your PDF has been successfully summarized and saved!',
             });
             formRef.current?.reset();
-            router.push(`/summaries/${savedId}`);
+            // router.push(`/summaries/${savedId}`);
         }
     }
 

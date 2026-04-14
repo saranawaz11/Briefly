@@ -1,3 +1,4 @@
+import NoSummary from '@/app/components/summaries/NoSummary'
 import SummaryCard from '@/app/components/summaries/SummaryCard'
 import { Button } from '@/components/ui/button'
 import { getSummaries } from '@/lib/summaries'
@@ -46,11 +47,17 @@ export default async function page() {
                         </div>
                     </div>
 
-                    <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 sm:px-0'>
-                        {summaries.map((summary) => (
-                            <SummaryCard key={summary.id} item={summary} />
-                        ))}
-                    </div>
+
+                    {summaries.length === 0 ? (
+                        <NoSummary />
+                    ) : (
+                            <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 sm:px-0'>
+                                {summaries.map((summary) => (
+                                    <SummaryCard key={summary.id} item={summary} />
+                                ))}
+                            </div>
+                    )}
+
                 </div>
             </div>
         </main>

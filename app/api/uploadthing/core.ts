@@ -12,7 +12,7 @@ export const ourFileRouter = {
         },
     })
         // Set permissions and file types for this FileRoute
-        .middleware(async ({ req }) => {
+        .middleware(async () => {
             const user = await currentUser();
             // console.log("User:", user);
             if (!user) throw new UploadThingError("Unauthorized");
@@ -20,8 +20,14 @@ export const ourFileRouter = {
         })
         .onUploadComplete(async ({ metadata, file }) => {
             console.log("Upload complete for userId:", metadata.userId);
-            // console.log("file url", file.ufsUrl);
-            return { uploadedBy: metadata.userId, file };
+            // serverData must be JSON-serializable (no full UploadedFileData object)
+            return {
+                uploadedBy: metadata.userId,
+                file: {
+                    ufsUrl: file.ufsUrl,
+                    name: file.name,
+                },
+            };
         }),
 } satisfies FileRouter;
 
