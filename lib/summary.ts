@@ -8,8 +8,12 @@ export async function getSummaryById(id:string) {
             user_id,
             summary_text,
             created_at,
+            original_file_url,
+            title,
             LENGTH(summary_text) - LENGTH(REPLACE(summary_text, ' ', ''))+1 as word_count
         FROM pdf_summaries where id=${id}`
+        console.log('Summary from summary server is:- ', summary);
+
         return summary;
     } catch (error) {
         console.log('Error fetchin summary', error)
