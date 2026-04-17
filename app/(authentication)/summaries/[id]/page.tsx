@@ -38,12 +38,12 @@ export default async function page(
             <FileText className='h-3 w-3 sm:h-4 sm:w-4 text-rose-400' />
             {word_count?.toLocaleString()}words
           </div>
-          <div>
+          <div className=''>
             <SummaryViewer summary={summary.summary_text} />
           </div>
         </div>
       </div>
-      <div className='h-screen bg-green-300'></div>
+      {/* <div className='h-screen bg-green-300'></div> */}
     </div>
   )
 }

@@ -131,6 +131,15 @@
 
 
 @layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   .animate-gradient-x {
     animation: gradient-x 3s ease infinite;
   }
