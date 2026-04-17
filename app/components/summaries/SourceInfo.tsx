@@ -6,10 +6,13 @@ import DownloadSummary from './DownloadSummary'
 type Props = {
     fileName: string;
     originalFileUrl: string;
+  title: string;
+  createdAt: string;
+  summaryText: string
 }
 
 export default function SourceInfo(
-    { fileName,originalFileUrl } : Props
+  { fileName, originalFileUrl, title, createdAt, summaryText }: Props
 ) {
   return (
     <div className=''>
@@ -18,17 +21,17 @@ export default function SourceInfo(
                 {fileName}
             </span>  
         </h1>
-        <div>
+      <div className=''>
             <div className='flex gap-2 justify-center items-center'>
                 <FileText className='h-4 w-4 text-rose-400'/>
                 Source: {fileName}
             </div>
-            <div>
-                <Link href={originalFileUrl} className='flex justify-center items-center gap-2'>
+        <div className='flex justify-center items-center gap-8 py-6'>
+          <Link href={originalFileUrl} className='flex justify-center items-center gap-2 text-rose-400'>
                     <ExternalLink className='h-4 w-4 text-rose-400'/>
                     View Original
                 </Link>
-                <DownloadSummary/>
+          <DownloadSummary title={title} createdAt={createdAt} summaryText={summaryText} fileName={fileName} />
             </div>
         </div>
     </div>

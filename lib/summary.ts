@@ -9,6 +9,7 @@ export async function getSummaryById(id:string) {
             summary_text,
             created_at,
             original_file_url,
+            file_name,
             title,
             LENGTH(summary_text) - LENGTH(REPLACE(summary_text, ' ', ''))+1 as word_count
         FROM pdf_summaries where id=${id}`
