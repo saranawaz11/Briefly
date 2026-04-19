@@ -54,7 +54,6 @@ CREATE TRIGGER update_pdf_summaries_updated_at
     BEFORE UPDATE ON pdf_summaries
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
-
 CREATE TRIGGER update_payments_updated_at
     BEFORE UPDATE ON payments
     FOR EACH ROW

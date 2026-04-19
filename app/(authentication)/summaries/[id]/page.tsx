@@ -2,7 +2,6 @@ import SourceInfo from '@/app/components/summaries/SourceInfo';
 import SummaryHeader from '@/app/components/summaries/SummaryHeader';
 import SummaryViewer from '@/app/components/summaries/SummaryViewer';
 import { getSummaryById } from '@/lib/summary';
-import { read } from 'fs';
 import { FileText } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import React from 'react'
